@@ -29,6 +29,55 @@ mod parse;
 pub use backend::{CBackend, ManPageDocSource};
 pub use config::{SdkgenConfig, SymbolOverride};
 
+use handl_plugin_sdkgen::{
+    SdkgenBackend, SdkgenBackendDef, SdkgenModule, SdkgenRegistry, SdkgenRequest, SdkgenTarget,
+};
+
+/// Register the `c` sdkgen target on `reg` (ADR-0128 §0.1): backend `c`
+/// plus the target record `(backend: "c", emitter: "hnl-file")` — the
+/// emitter resolves by name through the registry, so this module never
+/// crate-depends on the emitter's repo.
+pub fn register(reg: &mut SdkgenRegistry) {
+    reg.register_backend(SdkgenBackendDef {
+        name: "c",
+        make: make_backend,
+    });
+    reg.register_target(SdkgenTarget {
+        name: "c",
+        backend: "c",
+        emitter: "hnl-file",
+        source_filters: true,
+        docs: Some(apply_docs),
+        spec_input: None,
+    });
+}
+
+fn make_backend(
+    req: &SdkgenRequest<'_>,
+) -> Result<Box<dyn SdkgenBackend>, String> {
+    let config = match req.config {
+        Some(path) => SdkgenConfig::load(path)?,
+        None => SdkgenConfig::default(),
+    };
+    let backend = CBackend::new(
+        req.target.map(str::to_string),
+        config,
+        req.include.map(str::to_string),
+        req.exclude.map(str::to_string),
+    )
+    .map_err(|e| e.to_string())?;
+    Ok(Box::new(backend))
+}
+
+fn apply_docs(req: &SdkgenRequest<'_>, module: &mut SdkgenModule) -> Result<(), String> {
+    let config = match req.config {
+        Some(path) => SdkgenConfig::load(path)?,
+        None => SdkgenConfig::default(),
+    };
+    CBackend::apply_docs_with(&config, module, None);
+    Ok(())
+}
+
 #[cfg(test)]
 mod collect_test;
 #[cfg(test)]

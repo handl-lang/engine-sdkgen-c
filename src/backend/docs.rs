@@ -5,6 +5,7 @@
 use handl_plugin_sdkgen::{DocSource, SdkgenModule, pick_doc};
 
 use crate::backend::CBackend;
+use crate::config::SdkgenConfig;
 use crate::backend::man::ManPageDocSource;
 
 impl CBackend {
@@ -17,15 +18,26 @@ impl CBackend {
     /// When `external_docs` is not `false` (the default) and no `source`
     /// is supplied, a [`ManPageDocSource`] is auto-created and consulted.
     pub fn apply_docs(&self, module: &mut SdkgenModule, source: Option<&dyn DocSource>) {
-        let docs = &self.config.docs;
+        Self::apply_docs_with(&self.config, module, source)
+    }
+
+    /// [`CBackend::apply_docs`] over an explicit `config`, for callers
+    /// that layer docs without a constructed backend — the target's
+    /// registry `docs` hook (ADR-0128 §0.1) loads the config itself.
+    pub fn apply_docs_with(
+        config: &SdkgenConfig,
+        module: &mut SdkgenModule,
+        source: Option<&dyn DocSource>,
+    ) {
+        let docs = &config.docs;
         // Respect `external_docs: false` — skip external lookup entirely.
         // Otherwise auto-create a man-page source if the caller gave none.
-        let fallback = if self.config.external_docs != Some(false) && source.is_none() {
+        let fallback = if config.external_docs != Some(false) && source.is_none() {
             Some(ManPageDocSource::new())
         } else {
             None
         };
-        let src: Option<&dyn DocSource> = if self.config.external_docs == Some(false) {
+        let src: Option<&dyn DocSource> = if config.external_docs == Some(false) {
             None
         } else {
             source.or_else(|| fallback.as_ref().map(|s| s as &dyn DocSource))
