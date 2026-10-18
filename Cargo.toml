@@ -9,8 +9,8 @@ repository = "https://github.com/handl-lang/sdkgen-c"
 [dependencies]
 # ADR-0128 Phase 2: the sdkgen port stays in platform; this repo is the
 # c target. The workspace-root `[patch]` resolves the git dep from the
-# sibling `../platform` checkout for local development.
-handl-plugin-sdkgen = { git = "https://github.com/handl-lang/platform", branch = "main" }
+# sibling `../host` checkout for local development.
+handl-plugin-sdkgen = { git = "https://github.com/handl-lang/host", branch = "main" }
 clang-sys = { version = "1.9", features = ["runtime", "clang_20_0"] }
 serde = { version = "1", features = ["derive"] }
 serde_yaml = "0.9"
@@ -26,5 +26,5 @@ hnl-engine = { path = "../engine" }
 handl-language = { path = "../kernel/crates/handl-language" }
 handl-value = { path = "../kernel/crates/handl-value" }
 
-[patch."https://github.com/handl-lang/platform"]
-handl-plugin-sdkgen = { path = "../platform/crates/plugin-sdkgen" }
+[patch."https://github.com/handl-lang/host"]
+handl-plugin-sdkgen = { path = "../host/crates/plugin-sdkgen" }
