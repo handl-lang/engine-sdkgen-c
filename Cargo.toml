@@ -1,10 +1,10 @@
 [package]
 name = "handl-plugin-sdkgen-backend-c"
-version.workspace = true
-edition.workspace = true
+version = "0.1.0"
+edition = "2024"
 description = "C / libclang backend for the Handl SDK generator (ADR-0107)."
-license.workspace = true
-repository.workspace = true
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/handl-lang/sdkgen-c"
 
 [dependencies]
 # ADR-0128 Phase 2: the sdkgen port stays in platform; this repo is the
@@ -18,3 +18,13 @@ glob = "0.3"
 heck = "0.5"
 target-lexicon = "0.12"
 flate2 = "1.1"
+
+[patch."https://github.com/handl-lang/engine"]
+hnl-engine = { path = "../engine" }
+
+[patch."https://github.com/handl-lang/kernel"]
+handl-language = { path = "../kernel/crates/handl-language" }
+handl-value = { path = "../kernel/crates/handl-value" }
+
+[patch."https://github.com/handl-lang/platform"]
+handl-plugin-sdkgen = { path = "../platform/crates/plugin-sdkgen" }
