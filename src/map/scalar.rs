@@ -75,9 +75,12 @@ pub(crate) fn map_arg_type(ty: CXType, pointer_width: usize) -> Result<(String, 
             if pointer_width == 32 { "i32" } else { "i64" }.into(),
         ));
     }
-    if ty.kind == CXType_Typedef {
+    if ty.kind == CXType_Typedef || ty.kind == CXType_Elaborated {
         // Named typedefs get their ctypes alias; the descriptor comes
-        // from the canonical type's real width.
+        // from the canonical type's real width. libclang ≥16 wraps the
+        // typedef reference in an Elaborated sugar type (`__time_t`,
+        // `clockid_t` in glibc headers) — same handling: spelling carries
+        // the alias, canonical carries the width.
         let (mut port, descriptor) =
             map_arg_type(unsafe { clang_getCanonicalType(ty) }, pointer_width)?;
         if let Some(a) = alias {
@@ -124,7 +127,10 @@ pub(crate) fn map_field_type(ty: CXType) -> Result<(String, String), String> {
     if spelling == "ssize_t" {
         return Ok((alias.unwrap_or("Int").into(), "isize".into()));
     }
-    if ty.kind == CXType_Typedef {
+    if ty.kind == CXType_Typedef || ty.kind == CXType_Elaborated {
+        // Same as `map_arg_type`: libclang ≥16 spells typedef'd fields as
+        // Elaborated (`struct timespec`'s `__time_t tv_sec`) — recurse on
+        // the canonical type, keep the spelling's ctypes alias.
         let (mut port, descriptor) = map_field_type(unsafe { clang_getCanonicalType(ty) })?;
         if let Some(a) = alias {
             port = a.into();
