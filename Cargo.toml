@@ -5,6 +5,9 @@ edition = "2024"
 description = "C / libclang backend for the Handl SDK generator (ADR-0107)."
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/handl-lang/sdkgen-c"
+readme = "README.md"
+keywords = ["handl", "sdkgen", "c", "bindings"]
+categories = ["development-tools"]
 
 [dependencies]
 # ADR-0128 Phase 2: the sdkgen port stays in platform; this repo is the

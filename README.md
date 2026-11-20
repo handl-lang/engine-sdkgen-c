@@ -1,9 +1,18 @@
 # sdkgen-c
 
-`handl-plugin-sdkgen-backend-c` — C / libclang backend for the Handl SDK generator (ADR-0107).
+`handl-plugin-sdkgen-backend-c` — C / libclang backend for the Handl SDK
+generator. Part of the `sdkgen-*` family: consumes Handl SDK specs
+(`*.sdkgen.yaml`, `SdkgenConfig`) and emits C bindings/SDK sources.
 
-Sibling-repo deps are git dependencies (`branch = "main"`); `[patch]` tables
-resolve them from sibling checkouts.
+## Development
+
+```bash
+cargo xtask gate        # fmt --check → clippy -D warnings → test → doc
+```
+
+`cargo xtask` wraps the repo's `xtask/` crate; `ci.sh` is the gate entry.
+Deps resolve from git, so no sibling checkouts are needed; a plain clone
+test-runs as-is.
 
 ## Docs
 
@@ -11,3 +20,7 @@ resolve them from sibling checkouts.
   C → IR mapping rules, `.sdkgen.yaml` (`SdkgenConfig`) reference, and
   the descriptor vocabulary it emits.
 - Framework: [`host/docs/sdkgen/`](https://github.com/handl-lang/host/blob/main/docs/sdkgen/index.md).
+
+## License
+
+MIT.
