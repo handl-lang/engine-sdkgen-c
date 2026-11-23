@@ -1,7 +1,7 @@
-# engine-codegen-c
+# tool-codegen-c
 
 `handl-plugin-codegen-backend-c` — C / libclang backend for the Handl
-codegen pipeline. Part of the `engine-codegen-*` family (PL-004 T-075):
+codegen pipeline. Part of the `tool-codegen-*` family (PL-004 T-075):
 consumes specs (`*.sdkgen.yaml`, `SdkgenConfig`) and produces the
 `SdkgenModule` IR for `Source<SdkgenModule>` / `Emitter<SdkgenModule>`
 targets.

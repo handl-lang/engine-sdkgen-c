@@ -2,7 +2,7 @@
 
 `handl-plugin-codegen-backend-c` parses a C header through libclang and
 produces the generic `SdkgenModule` IR; the `hnl-file` emitter
-(`engine-codegen-file`) renders it. Framework context:
+(`tool-codegen-file`) renders it. Framework context:
 [`host/crates/plugin-codegen`](https://github.com/handl-lang/host/tree/main/crates/plugin-codegen).
 
 ```bash
