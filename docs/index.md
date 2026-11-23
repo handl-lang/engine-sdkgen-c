@@ -6,7 +6,7 @@ produces the generic `SdkgenModule` IR; the `hnl-file` emitter
 [`host/crates/plugin-codegen`](https://github.com/handl-lang/host/tree/main/crates/plugin-codegen).
 
 ```bash
-hnl sdkgen c /usr/include/time.h --output handl-packages/generated/libc \
+hnl codegen c /usr/include/time.h --output handl-packages/generated/libc \
     [--target x86_64-unknown-linux-gnu] [--include 'clock_*'] \
     [--exclude '…'] [--config libc.sdkgen.yaml]
 ```
