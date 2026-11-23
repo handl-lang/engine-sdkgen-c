@@ -2,7 +2,7 @@
 //! referenced by emitted functions, and repair `rec:` fields left
 //! pointing at records that were skipped or pruned.
 
-use handl_plugin_sdkgen::SdkgenModule;
+use handl_plugin_codegen::SdkgenModule;
 use std::collections::HashSet;
 
 /// Retain only records and typedefs named (as port types) by an emitted
@@ -36,10 +36,10 @@ pub(crate) fn fix_dangling_rec_fields(module: &mut SdkgenModule) {
     let emitted: HashSet<String> = module.records.iter().map(|r| r.name.clone()).collect();
     for r in &mut module.records {
         for f in &mut r.fields {
-            if let Some(rn) = f.descriptor.strip_prefix("rec:") {
-                if !emitted.contains(rn) {
-                    f.port = "Handle".into();
-                }
+            if let Some(rn) = f.descriptor.strip_prefix("rec:")
+                && !emitted.contains(rn)
+            {
+                f.port = "Handle".into();
             }
         }
     }

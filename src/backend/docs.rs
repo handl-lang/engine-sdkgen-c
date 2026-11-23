@@ -2,18 +2,18 @@
 //! and an optional external [`DocSource`] over comments captured from
 //! the header.
 
-use handl_plugin_sdkgen::{DocSource, SdkgenModule, pick_doc};
+use handl_plugin_codegen::{DocSource, SdkgenModule, pick_doc};
 
 use crate::backend::CBackend;
-use crate::config::SdkgenConfig;
 use crate::backend::man::ManPageDocSource;
+use crate::config::SdkgenConfig;
 
 impl CBackend {
     /// Layer `.sdkgen.yaml` `docs:` overrides and an optional external
     /// [`DocSource`] (e.g. [`ManPageDocSource`]) over comments
     /// captured from the header. Per slot: override > in-source comment
     /// > external lookup. Keys are C symbol names; record fields use
-    /// `record.field`.
+    /// > `record.field`.
     ///
     /// When `external_docs` is not `false` (the default) and no `source`
     /// is supplied, a [`ManPageDocSource`] is auto-created and consulted.

@@ -12,7 +12,7 @@ fn ctx(sn: &crate::testutil::Snippet) -> ParseCtx {
     }
 }
 
-fn parse(src: &str, fname: &str) -> Result<handl_plugin_sdkgen::Function, String> {
+fn parse(src: &str, fname: &str) -> Result<handl_plugin_codegen::Function, String> {
     let sn = parse_snippet(src);
     parse_function(sn.fn_cursor(fname), &ctx(&sn))
 }

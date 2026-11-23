@@ -27,22 +27,23 @@ pub(crate) fn clang_args(
         .parent()
         .filter(|p| !p.as_os_str().is_empty())
         .unwrap_or(Path::new("."));
-    let mut raw: Vec<CString> = Vec::new();
-    raw.push(CString::new("-x").unwrap());
-    raw.push(CString::new("c").unwrap());
-    // Retain *all* comments in the TU, not just doxygen-style ones — real
-    // headers (zlib, glibc) document declarations with plain `/* */` and
-    // `//` comments, which `clang_Cursor_getRawCommentText` otherwise
-    // never sees.
-    raw.push(CString::new("-fparse-all-comments").unwrap());
-    // `-iquote`, not `-I`: the header's directory must serve `"..."`
-    // includes but must NOT join the `<...>` search path — a system
-    // header directory (e.g. `/usr/include/unicode`) would otherwise
-    // shadow C library headers that share a basename (`<uchar.h>` finds
-    // ICU's uchar.h instead of the C11 one).
-    raw.push(CString::new("-iquote").unwrap());
-    raw.push(CString::new(header_dir.display().to_string()).unwrap());
-    raw.push(CString::new("-I/usr/include").unwrap());
+    let mut raw: Vec<CString> = vec![
+        CString::new("-x").unwrap(),
+        CString::new("c").unwrap(),
+        // Retain *all* comments in the TU, not just doxygen-style ones —
+        // real headers (zlib, glibc) document declarations with plain
+        // `/* */` and `//` comments, which
+        // `clang_Cursor_getRawCommentText` otherwise never sees.
+        CString::new("-fparse-all-comments").unwrap(),
+        // `-iquote`, not `-I`: the header's directory must serve `"..."`
+        // includes but must NOT join the `<...>` search path — a system
+        // header directory (e.g. `/usr/include/unicode`) would otherwise
+        // shadow C library headers that share a basename (`<uchar.h>`
+        // finds ICU's uchar.h instead of the C11 one).
+        CString::new("-iquote").unwrap(),
+        CString::new(header_dir.display().to_string()).unwrap(),
+        CString::new("-I/usr/include").unwrap(),
+    ];
     if let Some(res) = resource_dir() {
         raw.push(CString::new("-resource-dir").unwrap());
         raw.push(CString::new(res).unwrap());

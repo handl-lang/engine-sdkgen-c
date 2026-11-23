@@ -1,8 +1,8 @@
-//! C / libclang backend for the Handl SDK generator (ADR-0107).
+//! C / libclang backend for the Handl codegen pipeline (ADR-0107, PL-004).
 //!
 //! Pipeline, in module order:
 //! - [`backend`] — `CBackend`: libclang translation-unit setup and the
-//!   `SdkgenBackend::parse_header` driver (`clang_args` → TU →
+//!   `Source::parse` driver (`clang_args` → TU →
 //!   `diagnostics` → collect → parse → `macro_probe` → `prune` →
 //!   `imports`), plus `apply_docs` doc layering (`docs`, `man`).
 //! - [`cx`] — thin safe wrappers over libclang (strings, locations,
@@ -29,22 +29,23 @@ mod parse;
 pub use backend::{CBackend, ManPageDocSource};
 pub use config::{SdkgenConfig, SymbolOverride};
 
-use handl_plugin_sdkgen::{
-    SdkgenBackend, SdkgenBackendDef, SdkgenModule, SdkgenRegistry, SdkgenRequest, SdkgenTarget,
+use handl_plugin_codegen::{
+    AnySource, CodegenRegistry, CodegenRequest, CodegenSourceDef, CodegenTarget, SdkgenModule,
+    erase_source,
 };
 
-/// Register the `c` sdkgen target on `reg` (ADR-0128 §0.1): backend `c`
-/// plus the target record `(backend: "c", emitter: "hnl-file")` — the
-/// emitter resolves by name through the registry, so this module never
-/// crate-depends on the emitter's repo.
-pub fn register(reg: &mut SdkgenRegistry) {
-    reg.register_backend(SdkgenBackendDef {
+/// Register the `c` codegen target on `reg` (ADR-0128 §0.1, PL-004):
+/// source `c` plus the target record `(source: "c", emitter: "hnl-file")`
+/// — the emitter resolves by name through the registry, so this module
+/// never crate-depends on the emitter's repo.
+pub fn register(reg: &mut CodegenRegistry) {
+    reg.register_source(CodegenSourceDef {
         name: "c",
-        make: make_backend,
+        make: make_source,
     });
-    reg.register_target(SdkgenTarget {
+    reg.register_target(CodegenTarget {
         name: "c",
-        backend: "c",
+        source: "c",
         emitter: "hnl-file",
         source_filters: true,
         docs: Some(apply_docs),
@@ -52,9 +53,7 @@ pub fn register(reg: &mut SdkgenRegistry) {
     });
 }
 
-fn make_backend(
-    req: &SdkgenRequest<'_>,
-) -> Result<Box<dyn SdkgenBackend>, String> {
+fn make_source(req: &CodegenRequest<'_>) -> Result<Box<dyn AnySource>, String> {
     let config = match req.config {
         Some(path) => SdkgenConfig::load(path)?,
         None => SdkgenConfig::default(),
@@ -66,10 +65,10 @@ fn make_backend(
         req.exclude.map(str::to_string),
     )
     .map_err(|e| e.to_string())?;
-    Ok(Box::new(backend))
+    Ok(erase_source(backend))
 }
 
-fn apply_docs(req: &SdkgenRequest<'_>, module: &mut SdkgenModule) -> Result<(), String> {
+fn apply_docs(req: &CodegenRequest<'_>, module: &mut SdkgenModule) -> Result<(), String> {
     let config = match req.config {
         Some(path) => SdkgenConfig::load(path)?,
         None => SdkgenConfig::default(),

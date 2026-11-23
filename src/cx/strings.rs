@@ -163,10 +163,10 @@ fn translate_tag(l: &str) -> String {
         "brief" | "short" | "description" => body.to_string(),
         "param" | "arg" | "argument" => {
             let mut b = body;
-            if let Some(inner) = b.strip_prefix('[') {
-                if let Some(i) = inner.find(']') {
-                    b = inner[i + 1..].trim();
-                }
+            if let Some(inner) = b.strip_prefix('[')
+                && let Some(i) = inner.find(']')
+            {
+                b = inner[i + 1..].trim();
             }
             match b.find(char::is_whitespace) {
                 Some(i) => format!("{}: {}", &b[..i], b[i..].trim()),

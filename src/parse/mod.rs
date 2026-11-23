@@ -6,7 +6,7 @@
 //!   `(ptr, len)` pair collapse, `out_struct` resolution, and the
 //!   opaque-handle fallback for unknown records.
 
-use handl_plugin_sdkgen::Record;
+use handl_plugin_codegen::Record;
 use std::cell::RefCell;
 use std::collections::HashMap;
 

@@ -1,9 +1,9 @@
 # The `c` backend — C headers via libclang
 
-`handl-plugin-sdkgen-backend-c` parses a C header through libclang and
+`handl-plugin-codegen-backend-c` parses a C header through libclang and
 produces the generic `SdkgenModule` IR; the `hnl-file` emitter
-(`sdkgen-file`) renders it. Framework context:
-[`host/docs/sdkgen/`](https://github.com/handl-lang/host/blob/main/docs/sdkgen/index.md).
+(`engine-codegen-file`) renders it. Framework context:
+[`host/crates/plugin-codegen`](https://github.com/handl-lang/host/tree/main/crates/plugin-codegen).
 
 ```bash
 hnl sdkgen c /usr/include/time.h --output handl-packages/generated/libc \
@@ -17,7 +17,7 @@ true` on the target record).
 
 ## Pipeline
 
-`CBackend::parse_header` (`src/backend/mod.rs`):
+`Source<SdkgenModule>::parse` on `CBackend` (`src/backend/mod.rs`):
 
 1. **TU setup** — `clang_parseTranslationUnit` with `-x c
    -fparse-all-comments -iquote <header dir> -I/usr/include

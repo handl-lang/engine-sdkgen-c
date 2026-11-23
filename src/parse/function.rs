@@ -1,7 +1,7 @@
 //! Function declarations → `Function`.
 
 use clang_sys::*;
-use handl_plugin_sdkgen::{Arg, Function};
+use handl_plugin_codegen::{Arg, Function};
 use heck::ToUpperCamelCase;
 
 use crate::cx::{cursor_name, doc_comment, type_spelling};
@@ -182,7 +182,7 @@ fn struct_descriptor(
 /// expand inline recursively; an unknown nested record degrades to an
 /// opaque byte array (`arr:size:u8`) so the ABI stays correct.
 fn record_fields_descriptor(
-    rec: &handl_plugin_sdkgen::Record,
+    rec: &handl_plugin_codegen::Record,
     ctx: &ParseCtx,
 ) -> Result<String, String> {
     let mut out = String::new();

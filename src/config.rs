@@ -1,6 +1,6 @@
 //! `.sdkgen.yaml` configuration for the C backend.
 
-use handl_plugin_sdkgen::{Arg, Function};
+use handl_plugin_codegen::{Arg, Function};
 use heck::ToUpperCamelCase;
 use serde::Deserialize;
 use std::collections::HashMap;

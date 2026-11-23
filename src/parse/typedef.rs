@@ -1,7 +1,7 @@
 //! Typedef declarations → `Typedef`.
 
 use clang_sys::*;
-use handl_plugin_sdkgen::Typedef;
+use handl_plugin_codegen::Typedef;
 
 use crate::cx::{cursor_name, doc_comment};
 use crate::map::map_arg_type;

@@ -1,5 +1,5 @@
 //! The `CBackend` entry point: libclang translation-unit setup and the
-//! `SdkgenBackend::parse_header` driver.
+//! `Source::parse_header` driver.
 //!
 //! Pipeline: [`clang_args`] → parse TU → [`diagnostics`] gate on
 //! error/fatal → [`crate::collect`] declaration cursors →
@@ -31,7 +31,7 @@ mod prune_test;
 
 use clang_sys::*;
 use glob::Pattern;
-use handl_plugin_sdkgen::{SdkgenBackend, SdkgenError, SdkgenModule};
+use handl_plugin_codegen::{CodegenError, EmitContext, SdkgenModule, Source};
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::ffi::{CString, c_int, c_void};
@@ -54,11 +54,13 @@ pub struct CBackend {
 }
 
 /// Compile a comma-separated glob list (`"a*,b?,c"`) into patterns.
-fn globs(list: &str) -> Result<Vec<Pattern>, SdkgenError> {
+fn globs(list: &str) -> Result<Vec<Pattern>, CodegenError> {
     list.split(',')
         .map(|s| s.trim())
         .filter(|s| !s.is_empty())
-        .map(|s| Pattern::new(s).map_err(|e| SdkgenError(format!("invalid glob `{s}`: {e}"))))
+        .map(|s| {
+            Pattern::new(s).map_err(|e| CodegenError::Parse(format!("invalid glob `{s}`: {e}")))
+        })
         .collect()
 }
 
@@ -68,7 +70,7 @@ impl CBackend {
         config: SdkgenConfig,
         include: Option<String>,
         exclude: Option<String>,
-    ) -> Result<Self, SdkgenError> {
+    ) -> Result<Self, CodegenError> {
         let include = include.map(|p| globs(&p)).transpose()?.unwrap_or_default();
         let exclude = exclude.map(|p| globs(&p)).transpose()?.unwrap_or_default();
         let consts = config
@@ -89,12 +91,37 @@ impl CBackend {
     }
 }
 
-impl SdkgenBackend for CBackend {
-    fn parse_header(&self, path: &Path) -> Result<SdkgenModule, SdkgenError> {
+impl Source<SdkgenModule> for CBackend {
+    /// Lift a C header into [`SdkgenModule`] via libclang. Pure: parses
+    /// the TU, writes nothing. The header path comes from
+    /// `EmitContext::spec_path`; `source_url` is stamped as provenance.
+    fn parse(&self, req: &EmitContext) -> Result<SdkgenModule, CodegenError> {
+        let path = req.spec_path.as_deref().ok_or_else(|| {
+            CodegenError::Parse("c source requires EmitContext::spec_path".into())
+        })?;
+        self.parse_header_inner(path, req.source_url.as_deref())
+    }
+}
+
+impl CBackend {
+    /// Convenience wrapper for direct/test use — the pipeline entry
+    /// point is [`Source::parse`] over an [`EmitContext`].
+    pub fn parse_header(&self, path: &Path) -> Result<SdkgenModule, CodegenError> {
+        self.parse_header_inner(path, None)
+    }
+
+    fn parse_header_inner(
+        &self,
+        path: &Path,
+        source_url: Option<&str>,
+    ) -> Result<SdkgenModule, CodegenError> {
         if !path.is_file() {
-            return Err(SdkgenError(format!("header not found: {}", path.display())));
+            return Err(CodegenError::Parse(format!(
+                "header not found: {}",
+                path.display()
+            )));
         }
-        clang_sys::load().map_err(|e| SdkgenError(format!("libclang load failed: {e}")))?;
+        clang_sys::load().map_err(|e| CodegenError::Parse(format!("libclang load failed: {e}")))?;
 
         let target = self
             .target
@@ -103,7 +130,7 @@ impl SdkgenBackend for CBackend {
 
         let index = unsafe { clang_createIndex(0, 0) };
         if index.is_null() {
-            return Err(SdkgenError("libclang createIndex failed".into()));
+            return Err(CodegenError::Parse("libclang createIndex failed".into()));
         }
 
         // `_raw_args` owns the CStrings `args` points into — must outlive
@@ -125,7 +152,9 @@ impl SdkgenBackend for CBackend {
         };
         if tu.is_null() {
             unsafe { clang_disposeIndex(index) };
-            return Err(SdkgenError("libclang failed to parse header".into()));
+            return Err(CodegenError::Parse(
+                "libclang failed to parse header".into(),
+            ));
         }
         if let Err(e) = diagnostics::check_tu(tu) {
             unsafe { clang_disposeTranslationUnit(tu) };
@@ -177,10 +206,12 @@ impl SdkgenBackend for CBackend {
             )
         };
 
-        let mut module = SdkgenModule::default();
-        module.client_package = "ffi".into();
-        module.backend_id = "c".into();
-        module.target = target;
+        let mut module = SdkgenModule {
+            client_package: "ffi".into(),
+            backend_id: "c".into(),
+            target,
+            ..Default::default()
+        };
         if let Some(lib) = &self.config.library {
             module.library = lib.clone();
         }
@@ -257,6 +288,7 @@ impl SdkgenBackend for CBackend {
         prune::prune_unreferenced(&mut module);
         prune::fix_dangling_rec_fields(&mut module);
         imports::collect_type_imports(&mut module);
+        module.source = source_url.map(str::to_string);
 
         unsafe {
             clang_disposeTranslationUnit(tu);

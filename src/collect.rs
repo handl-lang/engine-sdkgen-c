@@ -8,7 +8,7 @@
 
 use clang_sys::*;
 use glob::Pattern;
-use handl_plugin_sdkgen::{EnumConst, SdkgenModule};
+use handl_plugin_codegen::{EnumConst, SdkgenModule};
 use std::ffi::c_void;
 
 use crate::cx::{children_of_kind, cursor_name, doc_comment, from_main_file, is_system_header};

@@ -3,7 +3,7 @@ use crate::cx::cursor_name;
 use crate::testutil::{Snippet, parse_snippet};
 use clang_sys::*;
 use glob::Pattern;
-use handl_plugin_sdkgen::SdkgenModule;
+use handl_plugin_codegen::SdkgenModule;
 use std::ffi::c_void;
 
 const SRC: &str = "\

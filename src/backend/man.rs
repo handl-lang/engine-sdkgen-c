@@ -2,7 +2,7 @@
 //! viewer, and the man7.org mirror.
 
 use flate2::read::GzDecoder;
-use handl_plugin_sdkgen::{DocSource, http_get};
+use handl_plugin_codegen::{DocSource, http_get};
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::io::Read;
@@ -33,10 +33,10 @@ impl ManPageDocSource {
             }
         }
         for section in ["2", "3"] {
-            if let Some(text) = run_man(section, key) {
-                if let Some(desc) = extract_name_section(&text) {
-                    return Some(desc);
-                }
+            if let Some(text) = run_man(section, key)
+                && let Some(desc) = extract_name_section(&text)
+            {
+                return Some(desc);
             }
         }
         for section in ["2", "3"] {
@@ -98,10 +98,10 @@ pub(crate) fn page_file_doc_in(roots: &[&str], symbol: &str, section: &str) -> O
             if let Some(rel) = text.trim_start().strip_prefix(".so ") {
                 let rel = rel.trim();
                 for cand in [root.join(format!("{rel}.gz")), root.join(rel)] {
-                    if let Some(t2) = read_page(&cand) {
-                        if let Some(doc) = extract_groff_name(&t2, symbol) {
-                            return Some(doc);
-                        }
+                    if let Some(t2) = read_page(&cand)
+                        && let Some(doc) = extract_groff_name(&t2, symbol)
+                    {
+                        return Some(doc);
                     }
                 }
             }
@@ -169,14 +169,14 @@ fn run_man(section: &str, symbol: &str) -> Option<String> {
 fn extract_name_section(text: &str) -> Option<String> {
     let mut lines = text.lines();
     while let Some(line) = lines.next() {
-        if line.trim() == "NAME" {
-            if let Some(name_line) = lines.next() {
-                let trimmed = name_line.trim();
-                if let Some(pos) = trimmed.find(" - ") {
-                    let desc = trimmed[pos + 3..].trim();
-                    if !desc.is_empty() {
-                        return Some(desc.to_string());
-                    }
+        if line.trim() == "NAME"
+            && let Some(name_line) = lines.next()
+        {
+            let trimmed = name_line.trim();
+            if let Some(pos) = trimmed.find(" - ") {
+                let desc = trimmed[pos + 3..].trim();
+                if !desc.is_empty() {
+                    return Some(desc.to_string());
                 }
             }
         }
@@ -258,10 +258,11 @@ pub(crate) fn extract_html_name(html: &str, symbol: &str) -> Option<String> {
     let pre_end = html[pre_start..].find("</pre>")? + pre_start;
     let text = strip_html(&html[pre_start..pre_end]);
     for line in text.lines() {
-        if let Some((names, desc)) = line.trim().split_once(" - ") {
-            if names.split(',').any(|n| n.trim() == symbol) && !desc.trim().is_empty() {
-                return Some(desc.trim().to_string());
-            }
+        if let Some((names, desc)) = line.trim().split_once(" - ")
+            && names.split(',').any(|n| n.trim() == symbol)
+            && !desc.trim().is_empty()
+        {
+            return Some(desc.trim().to_string());
         }
     }
     None

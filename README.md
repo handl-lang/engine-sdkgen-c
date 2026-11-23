@@ -1,8 +1,10 @@
-# engine-sdkgen-c
+# engine-codegen-c
 
-`handl-plugin-sdkgen-backend-c` — C / libclang backend for the Handl SDK
-generator. Part of the `engine-sdkgen-*` family: consumes Handl SDK specs
-(`*.sdkgen.yaml`, `SdkgenConfig`) and emits C bindings/SDK sources.
+`handl-plugin-codegen-backend-c` — C / libclang backend for the Handl
+codegen pipeline. Part of the `engine-codegen-*` family (PL-004 T-075):
+consumes specs (`*.sdkgen.yaml`, `SdkgenConfig`) and produces the
+`SdkgenModule` IR for `Source<SdkgenModule>` / `Emitter<SdkgenModule>`
+targets.
 
 ## Development
 
@@ -19,7 +21,7 @@ test-runs as-is.
 - [docs/index.md](docs/index.md) — the `c` backend: libclang pipeline,
   C → IR mapping rules, `.sdkgen.yaml` (`SdkgenConfig`) reference, and
   the descriptor vocabulary it emits.
-- Framework: [`host/docs/sdkgen/`](https://github.com/handl-lang/host/blob/main/docs/sdkgen/index.md).
+- Framework: [`host/crates/plugin-codegen`](https://github.com/handl-lang/host/tree/main/crates/plugin-codegen).
 
 ## License
 

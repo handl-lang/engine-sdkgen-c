@@ -1,5 +1,5 @@
 use crate::config::SdkgenConfig;
-use handl_plugin_sdkgen::{Arg, Function};
+use handl_plugin_codegen::{Arg, Function};
 
 fn func(name: &str, arg_names: &[&str]) -> Function {
     Function {

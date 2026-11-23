@@ -1,5 +1,5 @@
-use handl_plugin_sdkgen::{DocSource, SdkgenBackend};
-use handl_plugin_sdkgen_backend_c::{CBackend, SdkgenConfig};
+use handl_plugin_codegen::DocSource;
+use handl_plugin_codegen_backend_c::{CBackend, SdkgenConfig};
 use std::path::Path;
 
 #[test]

@@ -1,7 +1,7 @@
 //! Record (struct/union) declarations → `Record`.
 
 use clang_sys::*;
-use handl_plugin_sdkgen::{Field, Record};
+use handl_plugin_codegen::{Field, Record};
 
 use crate::cx::{children_of_kind, cursor_name, doc_comment, is_anonymous_decl, record_name};
 use crate::map::map_field_type;

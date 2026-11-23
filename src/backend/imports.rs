@@ -5,7 +5,7 @@
 //! `from "types/c/<header>" import {...}` — declared on the module as
 //! data, keeping the emitter backend-agnostic.
 
-use handl_plugin_sdkgen::{ModuleImport, SdkgenModule};
+use handl_plugin_codegen::{ModuleImport, SdkgenModule};
 use std::collections::{BTreeMap, BTreeSet};
 
 use crate::map::ctypes_module;

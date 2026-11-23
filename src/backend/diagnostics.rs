@@ -1,13 +1,13 @@
 //! Translation-unit diagnostic collection and the error/fatal gate.
 
 use clang_sys::*;
-use handl_plugin_sdkgen::SdkgenError;
+use handl_plugin_codegen::CodegenError;
 
 use crate::cx::cx_string;
 
 /// Collect libclang diagnostics of severity ≥ warning. Returns `Err` —
 /// with every message joined — when any error/fatal diagnostic exists.
-pub(crate) fn check_tu(tu: CXTranslationUnit) -> Result<(), SdkgenError> {
+pub(crate) fn check_tu(tu: CXTranslationUnit) -> Result<(), CodegenError> {
     let mut fatal = false;
     let mut msgs = Vec::new();
     let num = unsafe { clang_getNumDiagnostics(tu) };
@@ -32,7 +32,7 @@ pub(crate) fn check_tu(tu: CXTranslationUnit) -> Result<(), SdkgenError> {
         unsafe { clang_disposeDiagnostic(diag) };
     }
     if fatal {
-        Err(SdkgenError(format!(
+        Err(CodegenError::Parse(format!(
             "libclang reported parse errors:\n{}",
             msgs.join("\n")
         )))

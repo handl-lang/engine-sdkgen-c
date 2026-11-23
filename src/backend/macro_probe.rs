@@ -10,7 +10,7 @@
 //! produce no evaluable constant and are dropped.
 
 use clang_sys::*;
-use handl_plugin_sdkgen::EnumConst;
+use handl_plugin_codegen::EnumConst;
 use std::collections::HashMap;
 use std::ffi::{CString, c_char, c_int, c_ulong};
 use std::path::{Path, PathBuf};
