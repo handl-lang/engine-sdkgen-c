@@ -1,7 +1,7 @@
-# tool-sdkgen-c
+# engine-sdkgen-c
 
 `handl-plugin-sdkgen-backend-c` — C / libclang backend for the Handl SDK
-generator. Part of the `tool-sdkgen-*` family: consumes Handl SDK specs
+generator. Part of the `engine-sdkgen-*` family: consumes Handl SDK specs
 (`*.sdkgen.yaml`, `SdkgenConfig`) and emits C bindings/SDK sources.
 
 ## Development
